@@ -38,4 +38,3 @@ ctest --test-dir build --output-on-failure
 
 - C++17，开启 `-Wall -Wextra -Wpedantic`（MSVC 为 `/W4 /permissive-`）
 - 核心逻辑在 `filearchiver_core` 库目标中，`filearchiver` 可执行文件仅做 CLI 入口
-- `writeArchive()` 目前为占位实现（逐行写入路径），后续替换为真实归档格式
