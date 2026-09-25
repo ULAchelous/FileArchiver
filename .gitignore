@@ -1,0 +1,22 @@
+# Build directories
+build/
+build-*/
+out/
+cmake-build-*/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Compiled artifacts
+*.o
+*.a
+*.so
+*.dylib
+*.exe
+compile_commands.json
+
+# Archives produced during testing
+*.fa
