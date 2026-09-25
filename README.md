@@ -2,22 +2,6 @@
 
 基于 CMake 的 C++17 文件归档工具项目。
 
-## 目录结构
-
-```
-FileArchiver/
-├── CMakeLists.txt        # 顶层构建脚本
-├── include/              # 公共头文件
-│   └── archiver.hpp
-├── src/                  # 源文件（主库 + 可执行入口）
-│   ├── archiver.cpp
-│   └── main.cpp
-├── tests/                # 单元测试
-│   ├── CMakeLists.txt
-│   └── test_archiver.cpp
-└── .gitignore
-```
-
 ## 构建与运行
 
 ```bash
@@ -33,8 +17,3 @@ cmake --build build
 # 测试
 ctest --test-dir build --output-on-failure
 ```
-
-## 说明
-
-- C++17，开启 `-Wall -Wextra -Wpedantic`（MSVC 为 `/W4 /permissive-`）
-- 核心逻辑在 `filearchiver_core` 库目标中，`filearchiver` 可执行文件仅做 CLI 入口
