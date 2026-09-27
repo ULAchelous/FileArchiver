@@ -30,6 +30,7 @@ int main(int argc, char* argv[]) {
     (void)argc;
     (void)argv;
 
+    LOGGER.info("NOTICE: THIS PROGRAM IS NOT A RELEASE VERSION , ALSO SO NOT A USABLE VERSION");
     try{
         reg::fa_register_builtin_types(registries);
         reg::fa_register_builtin_repo_templates(registries);
