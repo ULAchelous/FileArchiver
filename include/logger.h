@@ -20,13 +20,16 @@ namespace logger{
     class Logger{
         public:
             Logger(const std::string& name);
+            Logger(const std::string& name, std::filesystem::path log_file);
             void info(const std::string& message);
             void error(const std::string& message);
             void error(const std::string& msg,const std::error_code& ec);
+            void set_log_file(const std::filesystem::path& file);
         private:
             std::string _name;
             std::filesystem::path _log_file_path;
-       std::string _build_log_msg(LoggerType type,const std::string& message);
+            std::string _build_log_msg(LoggerType type,const std::string& message,bool is_colored);
+            void _write(const std::string& str);
     };
 }
 inline logger::Logger LOGGER("FileArchiver");

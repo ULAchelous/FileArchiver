@@ -2,9 +2,17 @@
 #include<string>
 #include<vector>
 #include <filesystem>
+#include "plugin/types.h"
+
+namespace reg{
+    class Registries;
+}
 
 struct FileType{
-    FileType() = default;
+    FileType(fa_file_t type): id(type.id), classify_func(type.classify_func) {
+        for(int i=0;i<type.ext_count;i++)
+            exts.push_back(type.exts[i]);
+    };
     FileType(const std::string& _id,const std::vector<std::string>& _exts,bool (*_classify_func)(const char* file)):id(_id),exts(_exts),classify_func(_classify_func){}
     std::string id;
     std::vector<std::string> exts;
@@ -20,4 +28,14 @@ struct File{
     const FileType* type = nullptr;
 };
 
+namespace repo { struct Repository; }
+
+struct DirNode{
+    std::filesystem::path path;
+    repo::Repository* repo;
+    std::vector<DirNode*> children;
+};
+
+const FileType* fa_get_file_type(const std::filesystem::path& path,reg::Registries* registries);
 std::error_code fa_move_file(const std::filesystem::path& file,const std::filesystem::path& target);
+bool fa_path_contains(const std::filesystem::path base,const std::filesystem::path path);

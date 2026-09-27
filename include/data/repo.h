@@ -5,11 +5,13 @@
 #include <filesystem>
 #include <yaml-cpp/yaml.h>
 #include "data/file.h"
-#include "registry.h"
+
+namespace reg { class Registries; }
 
 namespace repo{
     class Manifest{
         public:
+            ~Manifest();
             Manifest(const std::filesystem::path& source_file,reg::Registries* registries);
             std::string get_target_dir(const File& file) const;
             const std::string& get_name() const { return _name; }
@@ -17,6 +19,7 @@ namespace repo{
             const std::filesystem::path& get_source_file() const { return _source_file; }
             const std::vector<std::filesystem::path>& get_sources() const { return _sources; }
             const std::vector<std::string>& get_exclude() const { return _exclude; }
+            reg::Registries* get_registries() const {return _registries; }
             const std::unordered_map<const FileType*, std::string>& get_type_to_dir() const { return _type_to_dir; }
         private:
             YAML::Node _structure;
@@ -35,7 +38,15 @@ namespace repo{
         const std::filesystem::path root_dir;
         const Manifest manifest;
     };
+
+    struct RepoTemplate{
+        std::string name;
+        std::string structure;
+        std::string exclude;
+        std::string sources;
+        std::filesystem::path log_file;
+    };
 }
 
-
+void fa_create_repo(const std::filesystem::path& repo_path,const std::string& name,const std::vector<std::string>& exclude,const std::vector<std::filesystem::path> sources,const repo::RepoTemplate* repo_template);
 repo::Repository fa_load_repository(const std::filesystem::path& repo_path, reg::Registries* registries);

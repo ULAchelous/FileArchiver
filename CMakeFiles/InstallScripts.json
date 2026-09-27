@@ -1,0 +1,9 @@
+{
+	"InstallScripts" : 
+	[
+		"/Users/zyhfunny/Documents/VSC_PROJ/FileArchiver/cmake_install.cmake",
+		"/Users/zyhfunny/Documents/VSC_PROJ/FileArchiver/libs/yaml-cpp/cmake_install.cmake",
+		"/Users/zyhfunny/Documents/VSC_PROJ/FileArchiver/libs/yaml-cpp/util/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

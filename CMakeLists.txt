@@ -40,6 +40,23 @@ file(GLOB_RECURSE FILEARCHIVER_CORE_SOURCES CONFIGURE_DEPENDS
 )
 list(FILTER FILEARCHIVER_CORE_SOURCES EXCLUDE REGEX ".*/main\\.cpp$")
 
+# ---- 平台检测 + listener 源文件筛选 ----
+# 每个平台只编译对应的 listener 实现（macosx.cpp 无 #ifdef 守卫，必须由 CMake 排除）
+# 注意顺序：APPLE 在 UNIX 之前（macOS 同时满足 APPLE 和 UNIX），WIN32 独立
+if(APPLE)
+    set(FILEARCHIVER_PLATFORM "macOS")
+    list(FILTER FILEARCHIVER_CORE_SOURCES EXCLUDE REGEX ".*/listener/(windows|linux)\\.cpp$")
+elseif(WIN32)
+    set(FILEARCHIVER_PLATFORM "Windows")
+    list(FILTER FILEARCHIVER_CORE_SOURCES EXCLUDE REGEX ".*/listener/(macosx|linux)\\.cpp$")
+elseif(UNIX)
+    set(FILEARCHIVER_PLATFORM "Linux")
+    list(FILTER FILEARCHIVER_CORE_SOURCES EXCLUDE REGEX ".*/listener/(macosx|windows)\\.cpp$")
+else()
+    message(FATAL_ERROR "FileArchiver: 不支持的平台（需要 APPLE / WIN32 / UNIX-Linux 之一）")
+endif()
+message(STATUS "FileArchiver target platform: ${FILEARCHIVER_PLATFORM}")
+
 if(FILEARCHIVER_CORE_SOURCES)
     message(STATUS "Core library sources:")
     foreach(f IN LISTS FILEARCHIVER_CORE_SOURCES)
@@ -66,6 +83,14 @@ target_include_directories(filearchiver_core
 
 target_link_libraries(filearchiver_core PUBLIC yaml-cpp)
 
+# ---- 平台框架：macOS 文件系统监听（FSEvents / CoreFoundation）----
+if(APPLE)
+    target_link_libraries(filearchiver_core PUBLIC
+        "-framework CoreServices"
+        "-framework CoreFoundation"
+    )
+endif()
+
 # ---- 可执行文件 ----
 add_executable(filearchiver
     src/main.cpp
@@ -77,7 +102,11 @@ set_target_properties(filearchiver PROPERTIES OUTPUT_NAME FileArchiver)
 include(CTest)
 if(BUILD_TESTING)
     enable_testing()
-    add_subdirectory(tests)
+    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/CMakeLists.txt")
+        add_subdirectory(tests)
+    else()
+        message(STATUS "Skipping tests: tests/CMakeLists.txt not found")
+    endif()
 endif()
 
 # ---- 安装规则 ----

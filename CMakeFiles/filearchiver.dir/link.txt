@@ -1,0 +1,1 @@
+/usr/bin/c++ -O3 -DNDEBUG -arch arm64 -Wl,-search_paths_first -Wl,-headerpad_max_install_names CMakeFiles/filearchiver.dir/src/main.cpp.o -o bin/FileArchiver  lib/libfilearchiver_core.a lib/libyaml-cpp.a -framework CoreServices -framework CoreFoundation

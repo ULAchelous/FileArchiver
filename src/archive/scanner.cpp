@@ -26,27 +26,13 @@ std::vector<File> fa_scan(const std::filesystem::path& path, const repo::Reposit
                 continue;
             std::string ext = entry.path().extension().string();
             LOGGER.info("Processing file: " + entry.path().string() + ", ext=" + ext);
-
-
-            std::vector<FileType*> types;
+            
+            const FileType* type;
             try{
-                types = registries->get_registry<FileType>().get_types_by_ext(ext);
+                type = fa_get_file_type(entry.path(),registries);
             }catch(const std::exception& e){
-                try{
-                    registries->get_registry<FileType>().register_t(ext,FileType(ext,{ext},nullptr));
-                }catch(const std::exception& e){
-                    LOGGER.error(e.what());
-                    return files;
-                }
-                types = registries->get_registry<FileType>().get_types_by_ext(ext);
-            }
-
-            const FileType* type = types[0];
-            for(const FileType* t : types){
-                if(t->classify_func != nullptr && t->classify_func(entry.path().string().c_str())){
-                    type = t;
-                    break;
-                }
+                LOGGER.error("Failed to resolve file type: " + std::string(e.what()));
+                return files;
             }
 
             LOGGER.info("Resolved type for '" + entry.path().string() + "' -> '" + type->id + "'");

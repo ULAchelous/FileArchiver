@@ -1,6 +1,8 @@
 #include <filesystem>
+#include <fstream>
 #include <iostream>
 #include <string>
+#include <vector>
 #include "mathf.h"
 #include "renamer.h"
 #include "data/repo.h"
@@ -9,19 +11,39 @@
 #include "archiver/archive.h"
 #include "archiver/scanner.h"
 
+#include "listener.h"
+
+reg::Registries registries;
+YAML::Node config;
+
+
+void fa_load_config(std::filesystem::path config_file_path){
+    std::ofstream file(config_file_path,std::ios::app);
+    if(file){
+        
+    }else{
+        throw std::runtime_error("Failed to open config file");
+    }
+}
+
 int main(int argc, char* argv[]) {
     (void)argc;
     (void)argv;
 
-    try {
-        reg::Registries registries;
+    try{
         reg::fa_register_builtin_types(registries);
+        reg::fa_register_builtin_repo_templates(registries);
+
         std::filesystem::path root = "/Users/zyhfunny/Documents/VSC_PROJ/FileArchiver/tests/test_repo";
-        repo::Repository repo = fa_load_repository(root, &registries);
-        fa_archive(fa_scan(root,repo, &registries), repo);
-    } catch (const std::exception& e) {
-        std::cerr << "Repository/registry smoke test failed: " << e.what() << std::endl;
-        return 1;
+        std::filesystem::path create_root = "/Users/zyhfunny/Documents/VSC_PROJ/FileArchiver/tests/new_repo";
+        
+        //fa_create_repo(create_root,"test",std::vector<std::string>(),std::vector<std::filesystem::path>(),registries.get_registry<repo::RepoTemplate>().get_type("default"));
+        repo::Repository repo = fa_load_repository(root,&registries);
+        registries.get_registry<repo::Repository>().register_t(repo.manifest.get_name(),repo);
+
+        fa_start_fs_listener(&registries);
+    }catch(const std::exception& e){
+        LOGGER.error(e.what());
     }
 }
 
