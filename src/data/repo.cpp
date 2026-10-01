@@ -4,6 +4,7 @@
 #include "data/file.h"
 #include "logger.h"
 #include "registry.h"
+#include "app.h"
 
 #if defined(_WIN32)
 #include <shlobj.h>
@@ -34,11 +35,10 @@ std::string get_home(){
 #endif
 }
 
-Manifest::Manifest(const std::filesystem::path& source_file,reg::Registries* registries):_source_file(source_file),_registries(registries){
+Manifest::Manifest(const std::filesystem::path& source_file,Context& ctx):_source_file(source_file),_ctx(&ctx){
     LOGGER.info("Loading repository manifest: " + source_file.string());
     if(!std::filesystem::exists(source_file)){
-        LOGGER.error("Manifest file does not exist: " + source_file.string());
-        return;
+        throw std::runtime_error("Manifest file does not exist: " + source_file.string());
     }
     YAML::Node config = YAML::LoadFile(source_file.string());
     _structure = config["structure"];
@@ -80,9 +80,9 @@ Manifest::Manifest(const std::filesystem::path& source_file,reg::Registries* reg
 
 Manifest::~Manifest() = default;
 //{
-    // if(_registries == nullptr) return;
+    // if(_ctx == nullptr) return;
     // for(const std::filesystem::path& str : _sources)
-    //     _registries->get_registry<Repository>(). ;
+    //     _ctx->registries.get_registry<Repository>(). ;
 //};
 
 void Manifest::_recursion_structure(YAML::Node current,std::string name){
@@ -91,14 +91,14 @@ void Manifest::_recursion_structure(YAML::Node current,std::string name){
     if(current["types"]){
         for(const auto& iter : current["types"]){
             std::string type_str = iter.as<std::string>();
-            const FileType* type = _registries->get_registry<FileType>().get_type(type_str);
-            if(type == nullptr && _registries->get_registry<FileType>().get_types_by_ext(type_str).empty() && type_str[0] == '.'){//判断是否为扩展名且未被注册
+            const FileType* type = _ctx->registries.get_registry<FileType>().get_type(type_str);
+            if(type == nullptr && _ctx->registries.get_registry<FileType>().get_types_by_ext(type_str).empty() && type_str[0] == '.'){//判断是否为扩展名且未被注册
                 try{
-                    _registries->get_registry<FileType>().register_t(type_str,FileType(type_str,{type_str},nullptr));
+                    _ctx->registries.get_registry<FileType>().register_t(type_str,FileType(type_str,{type_str},nullptr));
                 }catch(const std::exception& e){
                     LOGGER.error(e.what());
                 }
-                type = _registries->get_registry<FileType>().get_type(type_str);
+                type = _ctx->registries.get_registry<FileType>().get_type(type_str);
             }
             if(type != nullptr && name != ""){
                 LOGGER.info("Mapping type '" + std::string(type->id) + "' -> directory '" + name + "'");
@@ -137,7 +137,7 @@ std::string Manifest::get_target_dir(const File& file) const{
     return _type_to_dir.at(file.type);
 }
 
-repo::Repository fa_load_repository(const std::filesystem::path& repo_path,reg::Registries* registries){
+repo::Repository fa_load_repository(const std::filesystem::path& repo_path,Context& ctx){
     LOGGER.info("Loading repository from: " + repo_path.string());
     if(!std::filesystem::exists(repo_path)){
         throw std::runtime_error("Repository path does not exist: " + repo_path.string());
@@ -150,7 +150,7 @@ repo::Repository fa_load_repository(const std::filesystem::path& repo_path,reg::
     }
 
     LOGGER.info("Repository config found: " + config_path.string());
-    repo::Manifest manifest = Manifest(config_path, registries);
+    repo::Manifest manifest = Manifest(config_path, ctx);
     LOGGER.set_log_file(repo_path / manifest.get_log_file());
     return Repository(repo_path, manifest);
 }

@@ -6,6 +6,7 @@
 #include "listener.h"
 #include "logger.h"
 #include "registry.h"
+#include "app.h"
 
 FSEvent cet(FSEventStreamEventFlags f){
     if (f & kFSEventStreamEventFlagItemRemoved)  return FSEvent::REMOVED;
@@ -28,10 +29,10 @@ static void callback(ConstFSEventStreamRef,void* user_data,size_t event_count,vo
     }
 }
 
-void fa_start_fs_listener(reg::Registries* registries){
+void fa_start_fs_listener(Context& ctx){
     std::vector<CFArrayRef> cf_array; 
     std::vector<FSEventStreamRef> fs_event_stream;
-    for(auto& iter : registries->get_registry<repo::Repository>().data()){
+    for(auto& iter : ctx.registries.get_registry<repo::Repository>().data()){
         std::vector<const void*> srcs;
         for(const auto& src : iter.second.manifest.get_sources()){
             const void* ptr = CFStringCreateWithCString(nullptr,src.c_str(),kCFStringEncodingUTF8);

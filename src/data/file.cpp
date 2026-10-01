@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "registry.h"
+#include "app.h"
 
 using namespace std;
 
@@ -20,14 +21,14 @@ bool fa_path_contains(const std::filesystem::path base,const std::filesystem::pa
     return !rel.empty() & *rel.begin() != "..";
 }
 
-const FileType* fa_get_file_type(const std::filesystem::path& path,reg::Registries* registries){
+const FileType* fa_get_file_type(const std::filesystem::path& path,Context& ctx){
     std::string ext = path.extension().string();
     std::vector<FileType*> types;
     try{
-        types = registries->get_registry<FileType>().get_types_by_ext(ext);
+        types = ctx.registries.get_registry<FileType>().get_types_by_ext(ext);
     }catch(const std::exception& e){
-        registries->get_registry<FileType>().register_t(ext,FileType(ext,{ext},nullptr));
-        types = registries->get_registry<FileType>().get_types_by_ext(ext);
+        ctx.registries.get_registry<FileType>().register_t(ext,FileType(ext,{ext},nullptr));
+        types = ctx.registries.get_registry<FileType>().get_types_by_ext(ext);
     }
 
     const FileType* type = types[0];

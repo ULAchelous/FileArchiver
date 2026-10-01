@@ -6,6 +6,7 @@
 #include "data/file.h"
 #include "logger.h"
 #include "archiver/archive.h"
+#include "app.h"
 
 
 void fa_fs_event_holder(FSEvent event,const std::filesystem::path& path,repo::Repository* repo){
@@ -33,7 +34,7 @@ void fa_fs_event_holder(FSEvent event,const std::filesystem::path& path,repo::Re
 }
 void fa_fs_on_created(const std::filesystem::path& path,const repo::Repository* repo){
     LOGGER.info("FS event: repo: \"" + repo->manifest.get_name() + "\" created file \"" + path.string() + "\"");
-    File file(path,path.stem().string(),path.extension().string(),fa_get_file_type(path,repo->manifest.get_registries()));
+    File file(path,path.stem().string(),path.extension().string(),fa_get_file_type(path,*repo->manifest.get_ctx()));
 }
 void fa_fs_on_renamed(const std::filesystem::path& path,const repo::Repository* repo){
     LOGGER.info("FS event: repo: \"" + repo->manifest.get_name() + "\" renamed file \"" + path.string() + "\"");

@@ -12,6 +12,7 @@
 #include <vector>
 
 #include "registry.h"
+#include "app.h"
 
 namespace {
 
@@ -54,13 +55,13 @@ void add_watches_recursive(int fd, const std::filesystem::path& root, repo::Repo
 
 }  // namespace
 
-void fa_start_fs_listener(reg::Registries* registries) {
+void fa_start_fs_listener(Context& ctx) {
     int fd = inotify_init();
     if (fd < 0)
         throw std::runtime_error("inotify_init failed: " + std::string(strerror(errno)));
 
     WdMap wd_map;
-    for (auto& iter : registries->get_registry<repo::Repository>().data()) {
+    for (auto& iter : ctx.registries.get_registry<repo::Repository>().data()) {
         repo::Repository* repo = &iter.second;
         for (const auto& src : repo->manifest.get_sources())
             add_watches_recursive(fd, src, repo, wd_map);

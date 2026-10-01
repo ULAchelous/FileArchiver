@@ -5,10 +5,11 @@
 #include "logger.h"
 #include <string>
 #include "registry.h"
+#include "app.h"
 #include "data/repo.h"
 #include <vector>
 
-std::vector<File> fa_scan(const std::filesystem::path& path, const repo::Repository& repo, reg::Registries* registries){
+std::vector<File> fa_scan(const std::filesystem::path& path, const repo::Repository& repo, Context& ctx){
     std::vector<File> files;
     LOGGER.info("Scanning directory: " + path.string());
 
@@ -29,7 +30,7 @@ std::vector<File> fa_scan(const std::filesystem::path& path, const repo::Reposit
             
             const FileType* type;
             try{
-                type = fa_get_file_type(entry.path(),registries);
+                type = fa_get_file_type(entry.path(),ctx);
             }catch(const std::exception& e){
                 LOGGER.error("Failed to resolve file type: " + std::string(e.what()));
                 return files;

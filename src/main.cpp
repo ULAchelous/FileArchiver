@@ -10,39 +10,32 @@
 #include "data/registry_builtin.h"
 #include "archiver/archive.h"
 #include "archiver/scanner.h"
+#include "app.h"
 
 #include "listener.h"
 
-reg::Registries registries;
-YAML::Node config;
 
-
-void fa_load_config(std::filesystem::path config_file_path){
-    std::ofstream file(config_file_path,std::ios::app);
-    if(file){
-        
-    }else{
-        throw std::runtime_error("Failed to open config file");
-    }
-}
 
 int main(int argc, char* argv[]) {
     (void)argc;
     (void)argv;
 
-    LOGGER.info("NOTICE: THIS PROGRAM IS NOT A RELEASE VERSION , ALSO SO NOT A USABLE VERSION");
+    LOGGER.info("THIS PROGRAM IS NOT A RELEASE VERSION , ALSO NOT A USABLE VERSION");
     try{
-        reg::fa_register_builtin_types(registries);
-        reg::fa_register_builtin_repo_templates(registries);
+        Context ctx{
+            reg::Registries{},AppConfig(fa_get_exe_path() / ".config.yaml")
+        };
+        reg::fa_register_builtin_types(ctx);
+        reg::fa_register_builtin_repo_templates(ctx);
 
         std::filesystem::path root = "/Users/zyhfunny/Documents/VSC_PROJ/FileArchiver/tests/test_repo";
         std::filesystem::path create_root = "/Users/zyhfunny/Documents/VSC_PROJ/FileArchiver/tests/new_repo";
         
-        //fa_create_repo(create_root,"test",std::vector<std::string>(),std::vector<std::filesystem::path>(),registries.get_registry<repo::RepoTemplate>().get_type("default"));
-        repo::Repository repo = fa_load_repository(root,&registries);
-        registries.get_registry<repo::Repository>().register_t(repo.manifest.get_name(),repo);
+        //fa_create_repo(create_root,"test",std::vector<std::string>(),std::vector<std::filesystem::path>(),ctx.registries.get_registry<repo::RepoTemplate>().get_type("default"));
+        repo::Repository repo = fa_load_repository(root,ctx);
+        ctx.registries.get_registry<repo::Repository>().register_t(repo.manifest.get_name(),repo);
 
-        fa_start_fs_listener(&registries);
+        fa_start_fs_listener(ctx);
     }catch(const std::exception& e){
         LOGGER.error(e.what());
     }

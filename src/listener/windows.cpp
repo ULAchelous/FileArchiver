@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "registry.h"
+#include "app.h"
 
 namespace {
 
@@ -66,12 +67,12 @@ BOOL issue(Watch& w) {
 
 }  // namespace
 
-void fa_start_fs_listener(reg::Registries* registries) {
+void fa_start_fs_listener(Context& ctx) {
     // deque：push_back 不会让已有元素的地址失效，而 &w.ov 在挂起的 I/O 期间必须保持不动
     std::deque<Watch> watches;
     std::vector<HANDLE> events;
 
-    for (auto& iter : registries->get_registry<repo::Repository>().data()) {
+    for (auto& iter : ctx.registries.get_registry<repo::Repository>().data()) {
         repo::Repository* owner = &iter.second;
         for (const auto& src : owner->manifest.get_sources()) {
             HANDLE h = CreateFileW(

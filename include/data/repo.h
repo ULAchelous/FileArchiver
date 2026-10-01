@@ -4,22 +4,23 @@
 #include <unordered_map>
 #include <filesystem>
 #include <yaml-cpp/yaml.h>
+#include <stdexcept>
 #include "data/file.h"
 
-namespace reg { class Registries; }
+struct Context;
 
 namespace repo{
     class Manifest{
         public:
             ~Manifest();
-            Manifest(const std::filesystem::path& source_file,reg::Registries* registries);
+            Manifest(const std::filesystem::path& source_file,Context& ctx);
             std::string get_target_dir(const File& file) const;
             const std::string& get_name() const { return _name; }
             const std::filesystem::path& get_log_file() const { return _log_file; }
             const std::filesystem::path& get_source_file() const { return _source_file; }
             const std::vector<std::filesystem::path>& get_sources() const { return _sources; }
             const std::vector<std::string>& get_exclude() const { return _exclude; }
-            reg::Registries* get_registries() const {return _registries; }
+            Context* get_ctx() const {return _ctx; }
             const std::unordered_map<const FileType*, std::string>& get_type_to_dir() const { return _type_to_dir; }
         private:
             YAML::Node _structure;
@@ -29,7 +30,7 @@ namespace repo{
             std::string _name = "repository";
             std::filesystem::path _log_file;
             std::filesystem::path _source_file;
-            reg::Registries* _registries;
+            Context* _ctx;
             void _recursion_structure(YAML::Node current,std::string name);
     };
 
@@ -49,4 +50,4 @@ namespace repo{
 }
 
 void fa_create_repo(const std::filesystem::path& repo_path,const std::string& name,const std::vector<std::string>& exclude,const std::vector<std::filesystem::path> sources,const repo::RepoTemplate* repo_template);
-repo::Repository fa_load_repository(const std::filesystem::path& repo_path, reg::Registries* registries);
+repo::Repository fa_load_repository(const std::filesystem::path& repo_path, Context& ctx);

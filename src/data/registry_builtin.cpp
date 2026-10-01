@@ -1,5 +1,6 @@
 #include "data/registry_builtin.h"
 #include "data/file.h"
+#include "app.h"
 #include <vector>
 #include <string>
 
@@ -39,15 +40,15 @@ namespace reg{
         }
     };
 
-    void fa_register_builtin_types(Registries& registries){
-        auto& file_registry = registries.get_registry<FileType>();
+    void fa_register_builtin_types(Context& ctx){
+        auto& file_registry = ctx.registries.get_registry<FileType>();
         for(const FileType& t : kBuiltinTypes){
             file_registry.register_t(t.id, t);
         }
     }
 
-    void fa_register_builtin_repo_templates(Registries& registries){
-        auto& template_registry = registries.get_registry<repo::RepoTemplate>();
+    void fa_register_builtin_repo_templates(Context& ctx){
+        auto& template_registry = ctx.registries.get_registry<repo::RepoTemplate>();
         for(const repo::RepoTemplate& t : kBuiltinTemplates){
             template_registry.register_t(t.name,t);
         }

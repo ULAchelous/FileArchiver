@@ -4,9 +4,7 @@
 #include <filesystem>
 #include "plugin/types.h"
 
-namespace reg{
-    class Registries;
-}
+struct Context;
 
 struct FileType{
     FileType(fa_file_t type): id(type.id), classify_func(type.classify_func) {
@@ -36,6 +34,6 @@ struct DirNode{
     std::vector<DirNode*> children;
 };
 
-const FileType* fa_get_file_type(const std::filesystem::path& path,reg::Registries* registries);
+const FileType* fa_get_file_type(const std::filesystem::path& path,Context& ctx);
 std::error_code fa_move_file(const std::filesystem::path& file,const std::filesystem::path& target);
 bool fa_path_contains(const std::filesystem::path base,const std::filesystem::path path);
